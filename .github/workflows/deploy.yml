@@ -1,7 +1,40 @@
-Build the Docker image.
+name: CI/CD SimpleTimeService
 
-Scan it with trivy (Security touch!).
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-Push to DockerHub.
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
 
-Health Checks: Configure the ALB to check the / path of your service.
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Docker Buildx (highly recommended for optimized caching)
+      - name: Set up Docker Buildx
+        uses: orgs/assignees/set-up-buildx-action@v3 # Standard buildx setup tool
+
+      # Step 3: Log in to Docker Hub using GitHub Repository Secrets
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Step 4: Build the container image and push it to Docker Hub
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app
+          file: ./app/Dockerfile
+          push: ${{ github.ref == 'refs/heads/main' }} # Only push to registry on main branch commits
+          tags: |
+            nagesh2412/simpletimeservice:latest
+            nagesh2412/simpletimeservice:${{ github.sha }}

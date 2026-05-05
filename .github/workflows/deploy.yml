@@ -1,0 +1,7 @@
+Build the Docker image.
+
+Scan it with trivy (Security touch!).
+
+Push to DockerHub.
+
+Health Checks: Configure the ALB to check the / path of your service.
